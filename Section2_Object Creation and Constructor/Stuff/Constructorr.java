@@ -17,20 +17,38 @@ Class.getConstructors()
 */
 
 public class Constructorr {
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public static void main(String[] args)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         // getConstructorsData(Person.class);
 
-        Address address = (Address) createObjectFromArgument(Address.class, "56A","VietNam");
-        Person person = (Person) createObjectFromArgument(Person.class, 18,"Tung",address);
+        Class<Address> myAddress = Address.class;
+        Address newAddress =  createObjectFromArgument(Address.class, 1, 1);
+        Address address =  createObjectFromArgument(Address.class, "56A", "VietNam");
+        Person person =  createObjectFromArgument(Person.class, 18, "Tung", address);
+        try {
+            System.out.println(newAddress.toString()); 
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }       
         System.out.println(person.toString());
 
     }
 
-    public static Object createObjectFromArgument(Class<?> clazz, Object... arg)
+    public static <T> T createObjectFromArgument(Class<T> clazz, Object... arg)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
             if (constructor.getParameterCount() == arg.length) {
-                return constructor.newInstance(arg);
+                Class<?>[] typeArgs = constructor.getParameterTypes();
+                for (int i = 0; i < arg.length; i++) {
+                    if (!typeArgs[i].getSimpleName().equals(arg[i].getClass().getSimpleName())) {
+                        System.out.printf("constructor type is %s \n paramtype is %s \n cannot create object \n",
+                                typeArgs[i].getSimpleName(),
+                                arg[i].getClass().getSimpleName());
+                        return null;
+                    }
+                }
+                return (T) constructor.newInstance(arg);
             }
         }
         System.out.println("Cannot create object");
@@ -53,7 +71,11 @@ class Address {
     private String road;
     private String country;
 
-    public  Address(String road, String country) {
+    public Address() {
+
+    }
+
+    public Address(String road, String country) {
         this.road = road;
         this.country = country;
     }
@@ -65,16 +87,16 @@ class Address {
 }
 
 class Person {
-    private int age;
+    private Integer age;
     private String name;
     private Address address;
 
-    public  Person(int age, String name) {
+    public Person(Integer age, String name) {
         this.age = age;
         this.name = name;
     }
 
-    public  Person(int age, String name, Address address) {
+    public Person(Integer age, String name, Address address) {
         this(age, name);
         this.address = address;
     }
