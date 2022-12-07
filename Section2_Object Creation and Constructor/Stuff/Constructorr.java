@@ -1,5 +1,6 @@
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,8 +17,24 @@ Class.getConstructors()
 */
 
 public class Constructorr {
-    public static void main(String[] args) {
-        getConstructorsData(Person.class);
+    public static void main(String[] args) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        // getConstructorsData(Person.class);
+
+        Address address = (Address) createObjectFromArgument(Address.class, "56A","VietNam");
+        Person person = (Person) createObjectFromArgument(Person.class, 18,"Tung",address);
+        System.out.println(person.toString());
+
+    }
+
+    public static Object createObjectFromArgument(Class<?> clazz, Object... arg)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
+            if (constructor.getParameterCount() == arg.length) {
+                return constructor.newInstance(arg);
+            }
+        }
+        System.out.println("Cannot create object");
+        return null;
     }
 
     public static void getConstructorsData(Class<?> input) {
@@ -35,6 +52,16 @@ public class Constructorr {
 class Address {
     private String road;
     private String country;
+
+    public  Address(String road, String country) {
+        this.road = road;
+        this.country = country;
+    }
+
+    @Override
+    public String toString() {
+        return "Address [road=" + road + ", country=" + country + "]";
+    }
 }
 
 class Person {
@@ -42,13 +69,18 @@ class Person {
     private String name;
     private Address address;
 
-    private Person(int age, String name) {
+    public  Person(int age, String name) {
         this.age = age;
         this.name = name;
     }
 
-    private Person(int age, String name, Address address) {
-        this(age,name);
+    public  Person(int age, String name, Address address) {
+        this(age, name);
         this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Person [age=" + age + ", name=" + name + ", address=" + address + "]";
     }
 }
