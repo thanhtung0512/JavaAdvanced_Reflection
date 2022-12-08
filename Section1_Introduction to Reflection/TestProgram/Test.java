@@ -14,10 +14,7 @@ public class Test {
     public static void main(String[] args) {
         // Predicate <Integer> predicate = Test::testAge;
         // System.out.println(predicate.test(3));
-
-        List<Integer> number = Arrays.asList(2,3,4,5);
-        int even =
-        number.stream().filter(x->x%2==0).reduce(0,(ans,i)-> ans+i);
-        System.out.println(even);
+        Integer integer = new Integer();
+        System.out.println(integer.intValue());
     }
 }

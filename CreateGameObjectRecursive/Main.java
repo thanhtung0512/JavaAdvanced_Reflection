@@ -9,8 +9,17 @@ class Character {
     }
 }
 
+class BackgroundImage {
+    public BackgroundImage() {
+        System.out.println("Instantiating background image");
+    }
+}
+
 class Background {
-    public Background() {
+    BackgroundImage backgroundImage;
+
+    public Background(BackgroundImage backgroundImage) {
+        this.backgroundImage = backgroundImage;
         System.out.println("Instantiating background");
     }
 }
@@ -35,19 +44,22 @@ class Game {
     public void run() {
         System.out.println("Running");
     }
-
 }
 
 public class Main {
     public static void main(String[] args)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
         Game game = createObjectRecursively(Game.class);
+
         game.run();
     }
 
     public static <T> T createObjectRecursively(Class<T> clazz)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
         Constructor<?> firstConstructor = getFirstConstructor(clazz);
+
         List<Object> constructorArguments = new ArrayList<>();
 
         for (Class<?> eachClass : firstConstructor.getParameterTypes()) {
@@ -58,7 +70,9 @@ public class Main {
     }
 
     private static Constructor<?> getFirstConstructor(Class<?> clazz) {
+
         Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+
         if (constructors.length == 0) {
             throw new IllegalStateException(
                     String.format("No constructor has been found for class %s ", clazz.getSimpleName()));
