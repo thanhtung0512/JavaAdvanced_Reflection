@@ -31,28 +31,37 @@ class Person {
     private final float salary;
     private final Company job;
 
-    public Person(String name, boolean employed, int age, float salary, Company job) {
+    private final Person manager;
+
+    public Person(String name, boolean employed, int age, float salary, Company job, Person manager) {
         this.name = name;
         this.employed = employed;
         this.age = age;
         this.salary = salary;
         this.job = job;
+        this.manager = manager;
     }
 
 }
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        Company company = new Company("Netflix", "NYC", new Address("56A", (short) 14));
         Person person = new Person("Tung", true, 18, 1000,
-                new Company("Netflix", "NYC", new Address("56A", (short) 14)));
+                company, new Person("Manager", true, 22, 2000, company, null));
         int indent = 1;
-        System.out.println(objectToJson(person, indent));
+        try {
+            System.out.println(objectToJson(person, indent));
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println("Has some exception");
+        }
     }
 
     public static String objectToJson(Object instance, int indent) throws Exception {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append(returnIndent(indent-1) + "{" + "\n");
+        stringBuilder.append(returnIndent(indent - 1) + "{" + "\n");
 
         Field[] fields = instance.getClass().getDeclaredFields();
         int i = 0;
@@ -69,7 +78,8 @@ public class Main {
             } else if (field.getType().equals(String.class)) {
                 stringBuilder.append(formatStringValue(field.get(instance).toString()));
             } else {
-                stringBuilder.append(String.format("\n %s \n", objectToJson(field.get(instance), indent + 1)));
+                if (field.get(instance) != null) 
+                    stringBuilder.append(String.format("\n %s ", objectToJson(field.get(instance), indent + 1)));
             }
 
             if (i != fields.length - 1) {
@@ -78,7 +88,7 @@ public class Main {
             stringBuilder.append("\n");
             i++;
         }
-        stringBuilder.append(returnIndent(indent-1) + "}" );
+        stringBuilder.append(returnIndent(indent - 1) + "}");
         return stringBuilder.toString();
     }
 
