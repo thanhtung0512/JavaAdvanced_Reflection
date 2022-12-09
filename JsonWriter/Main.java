@@ -53,7 +53,6 @@ public class Main {
         try {
             System.out.println(objectToJson(person, indent));
         } catch (Exception e) {
-            // TODO: handle exception
             System.out.println("Has some exception");
         }
     }
@@ -70,16 +69,20 @@ public class Main {
                 continue;
             }
             stringBuilder.append(returnIndent(indent));
+
             field.setAccessible(true);
+
             stringBuilder.append(formatStringValue(field.getName()));
+
             stringBuilder.append(": ");
+
             if (field.getType().isPrimitive()) {
                 stringBuilder.append(formatPrimitiveValue(field, instance));
             } else if (field.getType().equals(String.class)) {
                 stringBuilder.append(formatStringValue(field.get(instance).toString()));
             } else {
-                if (field.get(instance) != null) 
-                    stringBuilder.append(String.format("\n %s ", objectToJson(field.get(instance), indent + 1)));
+                if (field.get(instance) != null)
+                    stringBuilder.append(String.format(" %s ", objectToJson(field.get(instance), indent + 1)));
             }
 
             if (i != fields.length - 1) {

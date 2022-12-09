@@ -1,1 +1,0 @@
-stringBuilder.append("\n");
