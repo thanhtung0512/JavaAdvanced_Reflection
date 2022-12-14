@@ -1,4 +1,5 @@
 import java.io.File;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
 class Address {
@@ -46,21 +47,26 @@ class Person {
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        Company company = new Company("Netflix", "NYC", new Address("56A", (short) 14));
-        Person person = new Person("Tung", true, 18, 1000,
-                company, new Person("Manager", true, 22, 2000, company, null));
-        int indent = 1;
+
+        Actor actor1 = new Actor("Elijah Wood", new String[] { "Lord of the Rings", "The Good Son" });
+        Actor actor2 = new Actor("Ian McKellen", new String[] { "X-Men", "Hobbit" });
+        Actor actor3 = new Actor("Orlando Broom", new String[] { "Pirates of the Caribbean", "Kingdom of Heaven" });
+
+        String[][] categories = { { "Action", "Adventure" }, { "Comedy", "Horror" } };
+        Moviee movie = new Moviee("Lord of The Rings", 8, categories, new Actor[] { actor1, actor2, actor3 });
         try {
-            System.out.println(objectToJson(person, indent));
+            String json = objectToJson(movie, 1);
+            System.out.printf("%s", json);
         } catch (Exception e) {
-            System.out.println("Has some exception");
+            // TODO: handle exception
+            System.out.println("Catch exception");
         }
     }
 
     public static String objectToJson(Object instance, int indent) throws Exception {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append(returnIndent(indent - 1) + "{" + "\n");
+        stringBuilder.append("{" + "\n");
 
         Field[] fields = instance.getClass().getDeclaredFields();
         int i = 0;
@@ -77,9 +83,11 @@ public class Main {
             stringBuilder.append(": ");
 
             if (field.getType().isPrimitive()) {
-                stringBuilder.append(formatPrimitiveValue(field, instance));
+                stringBuilder.append(formatPrimitiveValue(field.getType(), field.get(instance)));
             } else if (field.getType().equals(String.class)) {
                 stringBuilder.append(formatStringValue(field.get(instance).toString()));
+            } else if (field.getType().isArray()) {
+                stringBuilder.append(arrayToJson(field.get(instance), indent + 1));
             } else {
                 if (field.get(instance) != null)
                     stringBuilder.append(String.format(" %s ", objectToJson(field.get(instance), indent + 1)));
@@ -95,15 +103,15 @@ public class Main {
         return stringBuilder.toString();
     }
 
-    public static String formatPrimitiveValue(Field field, Object instance) throws Exception {
-        Class<?> fieldType = field.getType();
-        if (fieldType.equals(int.class) || fieldType.equals(boolean.class) ||
-                fieldType.equals(long.class) || fieldType.equals(short.class)) {
-            return field.get(instance).toString();
-        } else if (fieldType.equals(double.class) || fieldType.equals(float.class)) {
-            return String.format("%.2f", field.get(instance));
+    public static String formatPrimitiveValue(Class<?> type, Object value) throws Exception {
+
+        if (type.equals(int.class) || type.equals(boolean.class) ||
+                type.equals(long.class) || type.equals(short.class)) {
+            return value.toString();
+        } else if (type.equals(double.class) || type.equals(float.class)) {
+            return String.format("%.2f", value);
         }
-        throw new RuntimeException(String.format("Type :%s is not supported  ", fieldType.getName()));
+        throw new RuntimeException(String.format("Type :%s is not supported  ", type.getName()));
     }
 
     public static String formatStringValue(String value) {
@@ -116,6 +124,33 @@ public class Main {
         for (int i = 0; i < indent; i++) {
             stringBuilder.append("\t");
         }
+        return stringBuilder.toString();
+    }
+
+    public static String arrayToJson(Object arrayInstance, int indent) throws Exception {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[ \n");
+
+        Class<?> arrayClass = arrayInstance.getClass();
+        int length = Array.getLength(arrayInstance);
+        for (int i = 0; i < length; i++) {
+            Object element = Array.get(arrayInstance, i);
+            if (element.getClass().isArray()) {
+                stringBuilder.append(returnIndent(indent) + arrayToJson(element, indent + 1));
+            } else if (element.getClass().equals(String.class)) {
+                stringBuilder.append(returnIndent(indent) + formatStringValue(element.toString()));
+            } else if (element.getClass().isPrimitive()) {
+                stringBuilder.append(returnIndent(indent) + formatPrimitiveValue(element.getClass(), element));
+            } else {
+                stringBuilder.append(returnIndent(indent) + objectToJson(element, indent + 1));
+            }
+            if (i != length - 1) {
+                stringBuilder.append(",");
+            }
+            stringBuilder.append("\n");
+        }
+        stringBuilder.append(returnIndent(indent));
+        stringBuilder.append("]");
         return stringBuilder.toString();
     }
 }

@@ -14,7 +14,9 @@ public class Test {
     public static void main(String[] args) {
         // Predicate <Integer> predicate = Test::testAge;
         // System.out.println(predicate.test(3));
-        Integer integer = new Integer();
-        System.out.println(integer.intValue());
+        Integer i = new Integer(3);
+        Integer ii = new Integer(4);
+        Object o = new Object();
+        System.out.println(i.getClass() + " " + ii.getClass() + " " + o);
     }
 }
